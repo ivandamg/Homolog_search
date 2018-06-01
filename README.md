@@ -60,3 +60,46 @@
         for i in $(ls Seq*.fa); do cat $i | sed "s/>.*/>${i} /" | sed 's/\.fa//'| sed 's/,//' | sed 's/whole genome shotgun sequence//' > $(echo $i)2; done
 
 
+3. Alternative to point 2. 
+HMM search for finding homologs
+
+- Assemble in one file protein sequence in different strains 
+
+        cat Seq_comA_Streptococcus_pneumoniae_*faa2 > ALL_comA.faa
+
+- Align
+Mafft https://mafft.cbrc.jp/alignment/server/index.html
+clustalW 
+clustalO
+
+- Create HMM profile of alignment
+
+        for i in $(ls ALL*.aln); do echo $i; hmmbuild $(echo $i | sed 's/.aln/.hmm/g') $i ; done
+
+- Find homolog on other strain of other species using hmm profile
+ 
+    -on a single gene
+ 
+        hmmsearch ~/Documents/EPFL/Competence_in_NosoPath/GramNEG_competencegenes/Acinetobacter_baumannii/db_prot_genomes/ALL_comM.hmm  ~/Documents/EPFL/Competence_in_NosoPath/GramNEG_competencegenes/Campylobacter_sps/Campylobacter_jejuni_ATCC35925_ASM202830v1_Complete.faa > ~/Documents/EPFL/Competence_in_NosoPath/GramNEG_competencegenes/Campylobacter_sps/Competence_genes_hmm/Campylobacter_jejuni_ATCC35925.out
+
+    - on multiple genes
+    
+           for i in $(ls *.hmm); do echo $i ; for strain in $(ls ~/Documents/EPFL/Competence_in_NosoPath/GramNEG_competencegenes/Campylobacter_sps/*.faa); do echo $strain ; hmmsearch $i $strain > $(echo $strain | cut -d'.' -f1).out ; done; done
+
+- Look results and Select top hit
+
+        for i in $(ls ACIAD*comM*); do echo $i ; head -30 $i ; done
+
+- Select top hit and extract protein in new file (i.e. Gene_Genus_species_strain.fa)
+
+
+4. Compare results of HMM profile to blast search
+
+blast perform well when gene is conserved within strains. 
+case of looking homolog in close related species or within the same species
+
+HMM profile perform better when query is not well conserved. 
+case of looking homolog in far related species. Need to get sequences of the genes that are not conserved to create the HMM profile.
+
+
+
