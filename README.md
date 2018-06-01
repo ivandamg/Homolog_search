@@ -49,10 +49,14 @@
         for i in $(ls blastProt*.xml); do echo $i ; star="$(cat $i | cut -f2 |sed 's/^/blastdbcmd /g' | sed 's/ / -entry /g' | awk '$3="\x27"$3"\x27"')"; 
         # reorder coordinates; range="$(cat $i | cut -f9,10 | while read line; do echo $line | sed 's/ /\n/g' | sort | gawk '{line=line " " $0} END {print line}' ; done | sed 's/^ /-range/g' | sed 's/ /-/' | sed 's/range/range /')" ; 
         # extract name and add db part; # nb of lines in xml; lines="$(cat $i | wc -l)"; 
-        #export lines # put variable in open environment ; db="$(echo $i | cut -d'_' -f3,4,5,6,7 | sed 's/\.xml/_db/g' | sed 's/^/-db /' | perl -ne 'print $_ x $ENV{lines}')"; 
+        export lines # put variable in open environment ; db="$(echo $i | cut -d'_' -f3,4,5,6,7 | sed 's/\.xml/_db/g' | sed 's/^/-db /' | perl -ne 'print $_ x $ENV{lines}')"; 
         # to save in file;
         nam1="$(cat $i | cut -f1  | cut -f1 -d'/')";
         nam2="$(echo $i | cut -d'_' -f3,4,5,6,7 | sed 's/\.xml//g' | perl -ne 'print $_ x $ENV{lines}')";end="$(paste <(echo "$nam1") <(echo "$nam2") --delimiters '_' | sed 's/^/> Seq_/'| sed 's/$/.fa/' )";
         # aseemble everything ;paste <(echo "$star") <(echo "$db") <(echo "$range") <(echo "$end") --delimiters ' ' | grep $gene | head -1; done ; done
+
+- Change name of sequences
+
+        for i in $(ls Seq*.fa); do cat $i | sed "s/>.*/>${i} /" | sed 's/\.fa//'| sed 's/,//' | sed 's/whole genome shotgun sequence//' > $(echo $i)2; done
 
 
